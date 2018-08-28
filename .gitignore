@@ -328,3 +328,5 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+/TokenCacheMigration/unifiedCache.bin
+/TokenCacheMigration/cacheAdalV3.bin
