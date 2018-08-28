@@ -1,4 +1,4 @@
-# Token cache migration
+# Token cache migration between ADAL.NET 3.x, ADAL.NET 4.x, and MSAL.NET 2.x
 
 This solution shows how to customize token cache serialization in a .NET desktop application so that it shares the Single Sign On (SSO) state between:
 
