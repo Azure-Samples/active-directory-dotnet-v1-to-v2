@@ -1,3 +1,12 @@
+---
+services: active-directory
+platforms: dotnet
+author: jmprieur
+level: 300
+client: .NET Desktop (Console)
+service: none
+endpoint: AAD V1, AAD V2
+---
 # Migrating an application from using ADAL.NET to using MSAL.NET
 
 This sample gathers Visual Studio solutions illustrating the migration of Azure AD v1.0 applications (using ADAL.NET) to Azure AD v2.0 applications, also named converged applications (using MSAL.NET).
