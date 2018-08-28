@@ -8,7 +8,7 @@ This repository contains the following solutions
 
 Solution | Description
 -------- | -----------
-Token Cache Migration | shows the token cache customization for .NET desktop applications to share the Single Sign On (SSO) state between, [ADAL.NET](https://aka.ms/adalnet) V3.x applications, [ADAL.NET V4.x](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/changes-adalnet-4.0-preview) applications and [MSAL.NET](https://aka.ms/msalnet) 2.x applications.
+[Token Cache Migration](TokenCacheMigration/README.md) | shows the token cache customization for .NET desktop applications to share the Single Sign On (SSO) state between, [ADAL.NET](https://aka.ms/adalnet) V3.x applications, [ADAL.NET V4.x](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/changes-adalnet-4.0-preview) applications and [MSAL.NET](https://aka.ms/msalnet) 2.x applications.
 
 ## Getting Started
 
