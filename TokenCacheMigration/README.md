@@ -12,7 +12,7 @@ This solution provides three .NET desktop console applications and one common li
 
 - `CommonCacheAdalV3` is a desktop application referencing ADAL 3.19.8, and serializing / deserializing the token cache in the ADAL V3 legacy format
 - `CommonCacheAdalV4` is a desktop application referencing ADAL 4.x, and serializing / deserializing the token cache in both the ADAL V3 legacy format and the Unified cache format
-- `CommonCacheMsalV2` is a desktop application referencing ADAL 2.x, and serializing / deserializing the token cache in both the ADAL V3 legacy format and the Unified cache format
+- `CommonCacheMsalV2` is a desktop application referencing MSAL 2.x, and serializing / deserializing the token cache in both the ADAL V3 legacy format and the Unified cache format
 - `AppCoordinates` is a common library containing the application coordinates (really the ClientID) of an Azure AD application used in the three desktop applications.
 
 ## Getting Started
