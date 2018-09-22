@@ -15,6 +15,7 @@ namespace CommonCacheMsal2
         {
             Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
             DoIt().Wait();
+            Console.ReadLine();
         }
 
         static async Task DoIt()
@@ -25,7 +26,7 @@ namespace CommonCacheMsal2
 
             string cacheFolder = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + @"..\..\..\..");
             string adalV3cacheFileName = Path.Combine(cacheFolder, "cacheAdalV3.bin");
-            string unifiedCacheFileName = Path.Combine(cacheFolder, "unifiedCache.bin");
+            string unifiedCacheFileName = Path.Combine(cacheFolder, "unifiedCache.json");
             TokenCache tokenCache = FilesBasedTokenCacheHelper.GetUserCache(unifiedCacheFileName, adalV3cacheFileName);
 
             AuthenticationResult result;

@@ -101,8 +101,9 @@ namespace CommonCacheADAL
         /// <returns>Content of the file (in bytes)</returns>
         private byte[] ReadFromFileIfExists(string path)
         {
-            byte[] protectedBytes = (!string.IsNullOrEmpty(path) && File.Exists(path)) ? File.ReadAllBytes(path) : null;
-            byte[] unprotectedBytes = (protectedBytes != null) ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser) : null;
+ //           byte[] protectedBytes = (!string.IsNullOrEmpty(path) && File.Exists(path)) ? File.ReadAllBytes(path) : null;
+ //           byte[] unprotectedBytes = (protectedBytes != null) ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser) : null;
+            byte[] unprotectedBytes = (!string.IsNullOrEmpty(path) && File.Exists(path)) ? File.ReadAllBytes(path) : null;
             return unprotectedBytes;
         }
 
@@ -115,8 +116,9 @@ namespace CommonCacheADAL
         {
             if (blob != null)
             {
-                byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
-                File.WriteAllBytes(path, protectedBytes);
+                //byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
+                //File.WriteAllBytes(path, protectedBytes);
+                File.WriteAllBytes(path, blob);
             }
             else
             {
