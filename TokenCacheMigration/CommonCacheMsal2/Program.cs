@@ -33,7 +33,7 @@ namespace CommonCacheMsal2
             var accounts = await app.GetAccountsAsync();
             try
             {
-                result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault(), app.Authority, false);
+                result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault());
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
                 Console.ResetColor();
