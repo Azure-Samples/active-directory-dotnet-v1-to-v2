@@ -28,7 +28,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Cache;
 
 namespace CommonCacheMsal2
 {
@@ -92,7 +92,7 @@ namespace CommonCacheMsal2
         public static void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             // if the access operation resulted in a cache update
-            if (args.TokenCache.HasStateChanged)
+            if (args.HasStateChanged)
             {
                 lock (FileLock)
                 {
@@ -104,9 +104,6 @@ namespace CommonCacheMsal2
                     {
                         WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
                     }
-
-                    // once the write operationtakes place restore the HasStateChanged bit to false
-                    args.TokenCache.HasStateChanged = false;
                 }
             }
         }

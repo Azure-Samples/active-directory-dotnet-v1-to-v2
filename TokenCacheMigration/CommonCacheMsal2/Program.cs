@@ -39,7 +39,7 @@ namespace CommonCacheMsal2
                 Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
                 Console.ResetColor();
             }
-            catch (MsalUiRequiredException ex)
+            catch (MsalUiRequiredException)
             {
                 result = await app.AcquireTokenAsync(scopes);
                 Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
