@@ -1,42 +1,5 @@
 @echo off
 
-del cacheAdalV3.bin
-del unifiedCache.bin
-echo "validating ADALv3 sharing with ADALv4"
-CommonCacheAdalv3\bin\Debug\CommonCacheAdalV3.exe
-CommonCacheAdalV4\bin\Debug\CommonCacheAdalV4.exe
-
-del cacheAdalV3.bin
-del unifiedCache.bin
-echo "validating ADALv3 sharing with MSALv2"
-CommonCacheAdalv3\bin\Debug\CommonCacheAdalV3.exe
-CommonCacheMsal2\bin\Debug\CommonCacheMsal2.exe
-
-del cacheAdalV3.bin
-del unifiedCache.bin
-echo "validating ADALv4 sharing with ADALv3"
-CommonCacheAdalV4\bin\Debug\CommonCacheAdalV4.exe
-CommonCacheAdalv3\bin\Debug\CommonCacheAdalV3.exe
-
-del cacheAdalV3.bin
-del unifiedCache.bin
-echo "validating ADALv4 sharing with MSALv2"
-CommonCacheAdalV4\bin\Debug\CommonCacheAdalV4.exe
-CommonCacheMsal2\bin\Debug\CommonCacheMsal2.exe
-
-del cacheAdalV3.bin
-del unifiedCache.bin
-echo "validating MSALv2 sharing with ADALv3"
-CommonCacheMsal2\bin\Debug\CommonCacheMsal2.exe
-CommonCacheAdalv3\bin\Debug\CommonCacheAdalV3.exe
-
-del cacheAdalV3.bin
-del unifiedCache.bin
-echo "validating MSALv2 sharing with ADALv4"
-CommonCacheMsal2\bin\Debug\CommonCacheMsal2.exe
-CommonCacheAdalV4\bin\Debug\CommonCacheAdalV4.exe
-
-
 Rem -- Adding test app for sharing between MSALv2 and MSALv3
 del cacheAdalV3.bin
 del unifiedCache.bin
@@ -81,7 +44,5 @@ del unifiedCacheV2.bin
 echo "validating MSALv3 sharing with ADALv4"
 CommonCacheMsal3\bin\Debug\CommonCacheMsal3.exe
 CommonCacheAdalV4\bin\Debug\CommonCacheAdalV4.exe
-
-
 
 pause

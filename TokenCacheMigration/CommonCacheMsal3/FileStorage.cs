@@ -26,33 +26,43 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace AppCoordinates
 {
-    public class AppCoordinates
+    public static class FileStorage
     {
-        public string ClientId { get; set; }
-        public string Tenant { get; set; }
-        public string Authority { get { return $"https://login.microsoftonline.com/{Tenant}/";  } }
-        public Uri RedirectUri { get; set; }
-    }
-
-    public static class PreRegisteredApps
-    {
-        public static AppCoordinates GetV1App(bool useInMsal)
+        /// <summary>
+        /// Read the content of a file if it exists
+        /// </summary>
+        /// <param name="path">File path</param>
+        /// <returns>Content of the file (in bytes)</returns>
+        public static byte[] ReadFromFileIfExists(string path)
         {
-            return new AppCoordinates()
-            {
-                ClientId = "f0e0429e-060c-42d3-9375-913eb7c7a62d",
-                Tenant = useInMsal ? "organizations" : "common", // Multi-tenant: you can try it out in your AAD organization
-                RedirectUri = new Uri("urn:ietf:wg:oauth:2.0:oob")
-            };
+            byte[] protectedBytes = (!string.IsNullOrEmpty(path) && File.Exists(path)) ? File.ReadAllBytes(path) : null;
+            byte[] unprotectedBytes = (protectedBytes != null) ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser) : null;
+            return unprotectedBytes;
         }
 
-        // Resources
-        public static string MsGraph = "https://graph.microsoft.com";
-
-        // As Scope
-        public static string[] MsGraphWithUserReadScope = new string[] { "https://graph.microsoft.com/user.read" };
+        /// <summary>
+        /// Writes a blob of bytes to a file. If the blob is <c>null</c>, deletes the file
+        /// </summary>
+        /// <param name="path">path to the file to write</param>
+        /// <param name="blob">Blob of bytes to write</param>
+        public static void WriteToFileIfNotNull(string path, byte[] blob)
+        {
+            if (blob != null)
+            {
+                byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
+                File.WriteAllBytes(path, protectedBytes);
+            }
+            else
+            {
+                File.Delete(path);
+            }
+        }
     }
 }

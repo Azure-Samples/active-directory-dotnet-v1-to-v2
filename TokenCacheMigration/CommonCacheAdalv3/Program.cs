@@ -14,8 +14,13 @@ namespace CommonCacheADAL
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Running: " + Assembly.GetEntryAssembly().GetName());
+            Console.ResetColor();
             DoIt().Wait();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Hit any key to continue ...");
+            Console.ResetColor();
             Console.ReadLine();
         }
 
@@ -46,7 +51,9 @@ namespace CommonCacheADAL
             catch (AdalSilentTokenAcquisitionException)
             {
                 result = await authenticationContext.AcquireTokenAsync(resource, app.ClientId, app.RedirectUri, new PlatformParameters(PromptBehavior.SelectAccount));
-                Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' without the cache");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' using Interactive Auth");
+                Console.ResetColor();
             }
 
         }
