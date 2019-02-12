@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using AppCoordinates;
@@ -55,6 +56,12 @@ namespace CommonCacheMsal3
             UnifiedCacheFileName = Path.Combine(cacheFolder, "unifiedCache.bin");
             UnifiedV2CacheFileName = Path.Combine(cacheFolder, "unifiedCacheV2.bin"); 
             AdalV3CacheFileName = Path.Combine(cacheFolder, "cacheAdalV3.bin");
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("File 'AdalV3': " + File.Exists(AdalV3CacheFileName));
+            Console.WriteLine("File 'MsalV2': " + File.Exists(UnifiedCacheFileName));
+            Console.WriteLine("File 'MsalV3': " + File.Exists(UnifiedV2CacheFileName));
+            Console.ResetColor();
         }
 
         /// <summary>
@@ -71,6 +78,8 @@ namespace CommonCacheMsal3
             }
             return usertokenCache;
         }
+
+        public bool AllowAdalV3Format { get; set; } = false;
 
         /// <summary>
         /// File path where the token cache is serialiazed with the unified cache format (ADAL.NET V5, MSAL.NET V3)
@@ -91,30 +100,73 @@ namespace CommonCacheMsal3
         {
             lock (FileLock)
             {
-                CacheData cacheData = new CacheData
+                // We will need a CacheData which takes the new format allowing to read both from ADAL as well as from MSAL.
+                // Perhaps the easiest is to simply expand the CacheData class to include the new format and deprecate the old one?
+                // Unfortunately there might be people who are already using the Java Stuff.
+
+                byte[] v2UnifiedState = FileStorage.ReadFromFileIfExists(UnifiedV2CacheFileName);
+                byte[] adalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFileName);
+                byte[] unifiedState = FileStorage.ReadFromFileIfExists(UnifiedCacheFileName);
+
+                if (!AllowAdalV3Format)
                 {
-                    UnifiedState = FileStorage.ReadFromFileIfExists(UnifiedCacheFileName),
-                    AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFileName)
-                };
-                args.TokenCache.DeserializeUnifiedAndAdalCache(cacheData);
+                    adalV3State = null;
+                }
+
+                // Using new format if it exists.
+                if (v2UnifiedState != null)
+                {
+                    // Fallback using old unified format and adalv3 format
+                    CacheData cacheData = new CacheData
+                    {
+                        UnifiedState = null,
+                        AdalV3State = adalV3State
+                    };
+                    args.TokenCache.DeserializeUnifiedAndAdalCache(cacheData);
+                    args.TokenCache.DeserializeV3(v2UnifiedState);
+                }
+                else
+                {
+                    // Fallback using old unified format and adalv3 format
+                    CacheData cacheData = new CacheData
+                    {
+                        UnifiedState = unifiedState,
+                        AdalV3State = adalV3State
+                    };
+                    args.TokenCache.DeserializeUnifiedAndAdalCache(cacheData);
+                }
             }
         }
 
         private void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             // if the access operation resulted in a cache update
+            // initially when starting up, the args.HasStateChanged is not correct! 
+            // ... actually the byte array returns something but it's actually empty
             if (args.HasStateChanged)
             {
                 lock (FileLock)
                 {
-                    CacheData cacheData = args.TokenCache.SerializeUnifiedAndAdalCache();
+                    // TODO: Figure out if we should continue having a CacheData or if we should go with
+                    // SerializeAdalV3 and SerializeMsalV2, unfortunately we already used unified... 
+                    // Perhaps it should be called SerializeUnifiedFormat or SerializeSharedFormat
+                    // The main reason for not being able to stick to the names... would be that ADAL has to be updates 
+                    // and that one shipped as GA ... we risk developers not figuring out that the format has changed.
+                    // Need logging and exceptions allowing developers to handle this gracefully.
+                    // 
+                    // CommonCache { AdalV3State, CommonState/SharedState }
+                    // 
+                    // ... Miration Aid will not work with-out this.
+                    //
+                    // TODO: Add support for testing sharing with ADAL with-out using the ADALv3 format
 
-                    // reflect changesgs in the persistent store
+                    CacheData cacheData = args.TokenCache.SerializeUnifiedAndAdalCache();
+                    byte[] v2UnifiedState = args.TokenCache.SerializeV3();
+
+                    // Write all formats
+                    FileStorage.WriteToFileIfNotNull(UnifiedV2CacheFileName, v2UnifiedState);
+                    FileStorage.WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
                     FileStorage.WriteToFileIfNotNull(UnifiedCacheFileName, cacheData.UnifiedState);
-                    if (!string.IsNullOrWhiteSpace(AdalV3CacheFileName))
-                    {
-                        FileStorage.WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
-                    }
                 }
             }
         }

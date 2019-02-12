@@ -38,10 +38,16 @@ namespace CommonCacheMsal3
 {
     class Program
     {
+        private static bool AllowAdalV3Format = false;
         static void Main(string[] args)
         {
+            if (args.Length >= 1)
+            {
+                AllowAdalV3Format = args[0].Length > 0;
+            }
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Running: " + Assembly.GetEntryAssembly().GetName());
+            Console.WriteLine("AllowV3Format: " + AllowAdalV3Format);
             Console.ResetColor();
             DoIt().Wait();
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -56,7 +62,10 @@ namespace CommonCacheMsal3
             string[] scopes = AppCoordinates.PreRegisteredApps.MsGraphWithUserReadScope;
 
             string cacheFolder = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + @"..\..\..\..");
-            var fileBasedTokenCache = new FilesBasedTokenCache(cacheFolder);
+            var fileBasedTokenCache = new FilesBasedTokenCache(cacheFolder)
+            {
+                AllowAdalV3Format = AllowAdalV3Format
+            };
             TokenCache tokenCache = fileBasedTokenCache.GetUserCache();
 
             AuthenticationResult result;
