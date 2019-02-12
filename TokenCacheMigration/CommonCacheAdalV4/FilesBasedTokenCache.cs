@@ -22,8 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using AppCoordinates;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -32,27 +34,38 @@ namespace CommonCacheADAL
     /// <summary>
     /// Simple file based persistent cache implementation for a desktop application (from ADAL 4.x)
     /// </summary>
-    class FilesBasedTokenCache : TokenCache
+    public class FilesBasedTokenCache : TokenCache
     {
         public string AdalV3CacheFilePath { get; }
         public string UnifiedCacheFilePath { get; }
+        public string UnifiedCacheV2FilePath { get; }
+
         private static readonly object FileLock = new object();
 
         // Initializes the cache against a local file.
         // If the file is already rpesent, it loads its content in the ADAL cache
-        public FilesBasedTokenCache(string adalV3FilePath, string unifiedCacheFilePath)
+        public FilesBasedTokenCache(string cacheFolder)
         {
-            AdalV3CacheFilePath = adalV3FilePath;
-            this.AfterAccess = AfterAccessNotification;
-            this.UnifiedCacheFilePath = unifiedCacheFilePath;
-            this.BeforeAccess = BeforeAccessNotification;
-            lock (FileLock)
-            {
-                CacheData cacheData = new CacheData();
-                cacheData.AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath);
-                cacheData.UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath);
-                this.DeserializeAdalAndUnifiedCache(cacheData);
-            }
+            AdalV3CacheFilePath = Path.Combine(cacheFolder, "cacheAdalV3.bin");
+            UnifiedCacheFilePath = Path.Combine(cacheFolder, "unifiedCache.bin");
+            UnifiedCacheV2FilePath = Path.Combine(cacheFolder, "unifiedCacheV2.bin");
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("File 'AdalV3': " + File.Exists(AdalV3CacheFilePath));
+            Console.WriteLine("File 'MsalV2': " + File.Exists(UnifiedCacheFilePath));
+            Console.WriteLine("File 'MsalV3': " + File.Exists(UnifiedCacheV2FilePath));
+            Console.ResetColor();
+
+            AfterAccess = AfterAccessNotification;
+            BeforeAccess = BeforeAccessNotification;
+
+            //lock (FileLock)
+            //{
+            //    CacheData cacheData = new CacheData();
+            //    cacheData.AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath);
+            //    cacheData.UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath);
+            //    this.DeserializeAdalAndUnifiedCache(cacheData);
+            //}
         }
 
         // Empties the persistent store.
@@ -61,6 +74,7 @@ namespace CommonCacheADAL
             base.Clear();
             File.Delete(AdalV3CacheFilePath);
             File.Delete(UnifiedCacheFilePath);
+            File.Delete(UnifiedCacheV2FilePath);
         }
 
         // Triggered right before ADAL needs to access the cache.
@@ -70,9 +84,35 @@ namespace CommonCacheADAL
             lock (FileLock)
             {
                 CacheData cacheData = new CacheData();
-                cacheData.AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath);
-                cacheData.UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath);
-                this.DeserializeAdalAndUnifiedCache(cacheData);
+                cacheData.AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFilePath);
+                cacheData.UnifiedState = FileStorage.ReadFromFileIfExists(UnifiedCacheFilePath);
+
+                // new format
+                var v3 = FileStorage.ReadFromFileIfExists(UnifiedCacheV2FilePath);
+                if (v3 != null)
+                {
+                    this.DeserializeV3(v3);
+
+                    // This seems to overwrite the v3 state set. Thus should ideally only be done if no tokens exists
+                    if (cacheData.AdalV3State != null)
+                    {
+                        cacheData.AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFilePath);
+                        cacheData.UnifiedState = null;
+                        this.DeserializeAdalAndUnifiedCache(cacheData);
+                    }
+                }
+                //else if (v3 == null && cacheData.AdalV3State != null)
+                //{
+                //    cacheData.AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFilePath);
+                //    cacheData.UnifiedState = null;
+                //    this.DeserializeAdalAndUnifiedCache(cacheData);
+                //}
+                else
+                {
+                    cacheData.AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFilePath);
+                    cacheData.UnifiedState = FileStorage.ReadFromFileIfExists(UnifiedCacheFilePath);
+                    this.DeserializeAdalAndUnifiedCache(cacheData);
+                }
             }
         }
 
@@ -86,43 +126,15 @@ namespace CommonCacheADAL
                 {
                     // reflect changes in the persistent store
                     CacheData cacheData = this.SerializeAdalAndUnifiedCache();
-                    WriteToFileIfNotNull(AdalV3CacheFilePath, cacheData.AdalV3State);
-                    WriteToFileIfNotNull(UnifiedCacheFilePath, cacheData.UnifiedState);
+                    FileStorage.WriteToFileIfNotNull(AdalV3CacheFilePath, cacheData.AdalV3State);
+                    FileStorage.WriteToFileIfNotNull(UnifiedCacheFilePath, cacheData.UnifiedState);
+
+                    var v3 = this.SerializeV3(); // Seems to be missing AT?
+                    FileStorage.WriteToFileIfNotNull(UnifiedCacheV2FilePath, v3);
                     // once the write operation took place, restore the HasStateChanged bit to false
                     this.HasStateChanged = false;
                 }
             }
         }
-
-        /// <summary>
-        /// Read the content of a file if it exists
-        /// </summary>
-        /// <param name="path">File path</param>
-        /// <returns>Content of the file (in bytes)</returns>
-        private byte[] ReadFromFileIfExists(string path)
-        {
-            byte[] protectedBytes = (!string.IsNullOrEmpty(path) && File.Exists(path)) ? File.ReadAllBytes(path) : null;
-            byte[] unprotectedBytes = (protectedBytes != null) ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser) : null;
-            return unprotectedBytes;
-        }
-
-        /// <summary>
-        /// Writes a blob of bytes to a file. If the blob is <c>null</c>, deletes the file
-        /// </summary>
-        /// <param name="path">path to the file to write</param>
-        /// <param name="blob">Blob of bytes to write</param>
-        private static void WriteToFileIfNotNull(string path, byte[] blob)
-        {
-            if (blob != null)
-            {
-                byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
-                File.WriteAllBytes(path, protectedBytes);
-            }
-            else
-            {
-                File.Delete(path);
-            }
-        }
     }
-
 }

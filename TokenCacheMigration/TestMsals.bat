@@ -4,6 +4,9 @@ Rem -- Adding test app for sharing between MSALv3 and MSALv3, in new format
 del cacheAdalV3.bin
 del unifiedCache.bin
 del unifiedCacheV2.bin
+del cacheAdalV3.bak
+del unifiedCache.bak
+del unifiedCacheV2.bak
 echo "MSALv3: No Caches exists. Expecting Interactive Auth (allowing also adalv3)"
 CommonCacheMsal3\bin\Debug\CommonCacheMsal3.exe "AllowV3"
 
