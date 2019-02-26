@@ -88,31 +88,31 @@ namespace CommonCacheADAL
                 cacheData.UnifiedState = FileStorage.ReadFromFileIfExists(UnifiedCacheFilePath);
 
                 // new format
-                //var v3 = FileStorage.ReadFromFileIfExists(UnifiedCacheV2FilePath);
-                //if (v3 != null)
-                //{
-                //    this.DeserializeV3(v3);
+                var v3 = FileStorage.ReadFromFileIfExists(UnifiedCacheV2FilePath);
+                if (v3 != null)
+                {
+                    this.DeserializeV3(v3);
 
-                //    // This seems to overwrite the v3 state set. Thus should ideally only be done if no tokens exists
-                //    if (cacheData.AdalV3State != null)
-                //    {
-                //        cacheData.AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFilePath);
-                //        cacheData.UnifiedState = null;
-                //        this.DeserializeAdalAndUnifiedCache(cacheData);
-                //    }
-                //}
+                    // This seems to overwrite the v3 state set. Thus should ideally only be done if no tokens exists
+                    if (cacheData.AdalV3State != null)
+                    {
+                        cacheData.AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFilePath);
+                        cacheData.UnifiedState = null;
+                        this.DeserializeAdalAndUnifiedCache(cacheData);
+                    }
+                }
                 //else if (v3 == null && cacheData.AdalV3State != null)
                 //{
                 //    cacheData.AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFilePath);
                 //    cacheData.UnifiedState = null;
                 //    this.DeserializeAdalAndUnifiedCache(cacheData);
                 //}
-                //else
-                //{
+                else
+                {
                     cacheData.AdalV3State = FileStorage.ReadFromFileIfExists(AdalV3CacheFilePath);
                     cacheData.UnifiedState = FileStorage.ReadFromFileIfExists(UnifiedCacheFilePath);
                     this.DeserializeAdalAndUnifiedCache(cacheData);
-                //}
+                }
             }
         }
 
@@ -129,8 +129,8 @@ namespace CommonCacheADAL
                     FileStorage.WriteToFileIfNotNull(AdalV3CacheFilePath, cacheData.AdalV3State);
                     FileStorage.WriteToFileIfNotNull(UnifiedCacheFilePath, cacheData.UnifiedState);
 
-                    //var v3 = this.SerializeV3(); // Seems to be missing AT?
-                    //FileStorage.WriteToFileIfNotNull(UnifiedCacheV2FilePath, v3);
+                    var v3 = this.SerializeV3(); // Seems to be missing AT?
+                    FileStorage.WriteToFileIfNotNull(UnifiedCacheV2FilePath, v3);
                     // once the write operation took place, restore the HasStateChanged bit to false
                     this.HasStateChanged = false;
                 }

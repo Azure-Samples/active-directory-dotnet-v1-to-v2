@@ -14,10 +14,8 @@ namespace CommonCacheADAL
     {
         static void Main(string[] args)
         {
-            //Todo: Create an ADAL v5 project wich is a clone of this project. 
-            //Then re-create the ADAL v4 project
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            //ADAL v5 
+             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Running: " + Assembly.GetEntryAssembly().GetName());
             Console.ResetColor();
             DoIt().Wait();

@@ -5,13 +5,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Exe</OutputType>
-    <RootNamespace>CommonCacheAdalV4</RootNamespace>
-    <AssemblyName>CommonCacheAdalV4</AssemblyName>
+    <RootNamespace>CommonCacheAdalV5</RootNamespace>
+    <AssemblyName>CommonCacheAdalV5</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-    <ProjectGuid>{1DE05697-4293-444B-A684-B69C237E1BCB}</ProjectGuid>
+    <ProjectGuid>{F19E3E91-E0CF-47A5-AC0F-BBBBA0AEC90A}</ProjectGuid>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -35,7 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=4.5.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.4.5.1\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
+      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.4.5.1-internal04204v3serializeapi\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -62,7 +62,9 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AppCoordinates\AppCoordinates.csproj">
