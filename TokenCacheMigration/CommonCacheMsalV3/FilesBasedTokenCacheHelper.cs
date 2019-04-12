@@ -25,12 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Core.Cache;
 
-namespace CommonCacheMsal2
+namespace CommonCacheMsalV3
 {
     /// <summary>
     /// Simple persistent cache implementation of the dual cache serialization (ADAL V3 legacy
@@ -46,23 +46,20 @@ namespace CommonCacheMsal2
         /// <param name="unifiedCacheFileName">File name where the cache is serialized with the Unified cache format, common to
         /// ADAL V4 and MSAL V2 and above, and also accross ADAL/MSAL on the same platform. Should not be <c>null</c></param>
         /// <returns></returns>
-        public static TokenCache GetUserCache(string unifiedCacheFileName, string adalV3CacheFileName)
+        public static void EnableSerialization(ITokenCache cache, string unifiedCacheFileName, string adalV3CacheFileName)
         {
+            usertokenCache = cache;
             UnifiedCacheFileName = unifiedCacheFileName;
             AdalV3CacheFileName = adalV3CacheFileName;
-            if (usertokenCache == null)
-            {
-                usertokenCache = new TokenCache();
-                usertokenCache.SetBeforeAccess(BeforeAccessNotification);
-                usertokenCache.SetAfterAccess(AfterAccessNotification);
-            }
-            return usertokenCache;
+
+            usertokenCache.SetBeforeAccess(BeforeAccessNotification);
+            usertokenCache.SetAfterAccess(AfterAccessNotification);
         }
 
         /// <summary>
         /// Token cache
         /// </summary>
-        static TokenCache usertokenCache;
+        static ITokenCache usertokenCache;
 
         /// <summary>
         /// File path where the token cache is serialiazed with the unified cache format (ADAL.NET V4, MSAL.NET V3)
@@ -80,33 +77,31 @@ namespace CommonCacheMsal2
         {
             lock (FileLock)
             {
-                CacheData cacheData = new CacheData
+                args.TokenCache.DeserializeAdalV3(ReadFromFileIfExists(AdalV3CacheFileName));
+                try
                 {
-                    UnifiedState = ReadFromFileIfExists(UnifiedCacheFileName),
-                    AdalV3State = ReadFromFileIfExists(AdalV3CacheFileName)
-                };
-                args.TokenCache.DeserializeUnifiedAndAdalCache(cacheData);
+                    args.TokenCache.DeserializeMsalV3(ReadFromFileIfExists(UnifiedCacheFileName));
+                }
+                catch (Exception ex)
+                {
+                    // Compatibility with the MSAL v2 cache if you used one
+                    args.TokenCache.DeserializeMsalV2(ReadFromFileIfExists(UnifiedCacheFileName));
+                }
             }
         }
 
         public static void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             // if the access operation resulted in a cache update
-            if (args.TokenCache.HasStateChanged)
+            if (args.HasStateChanged)
             {
                 lock (FileLock)
                 {
-                    CacheData cacheData = args.TokenCache.SerializeUnifiedAndAdalCache();
-
-                    // reflect changesgs in the persistent store
-                    WriteToFileIfNotNull(UnifiedCacheFileName, cacheData.UnifiedState);
+                    WriteToFileIfNotNull(UnifiedCacheFileName, args.TokenCache.SerializeMsalV3());
                     if (!string.IsNullOrWhiteSpace(AdalV3CacheFileName))
                     {
-                        WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
+                        WriteToFileIfNotNull(AdalV3CacheFileName, args.TokenCache.SerializeAdalV3());
                     }
-
-                    // once the write operationtakes place restore the HasStateChanged bit to false
-                    args.TokenCache.HasStateChanged = false;
                 }
             }
         }
@@ -119,7 +114,9 @@ namespace CommonCacheMsal2
         private static byte[] ReadFromFileIfExists(string path)
         {
             byte[] protectedBytes = (!string.IsNullOrEmpty(path) && File.Exists(path)) ? File.ReadAllBytes(path) : null;
-            byte[] unprotectedBytes = (protectedBytes != null) ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser) : null;
+            byte[] unprotectedBytes = encrypt ?
+                ((protectedBytes != null) ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser) : null)
+                : protectedBytes;
             return unprotectedBytes;
         }
 
@@ -132,7 +129,7 @@ namespace CommonCacheMsal2
         {
             if (blob != null)
             {
-                byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
+                byte[] protectedBytes = encrypt ? ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser) : blob;
                 File.WriteAllBytes(path, protectedBytes);
             }
             else
@@ -140,5 +137,7 @@ namespace CommonCacheMsal2
                 File.Delete(path);
             }
         }
+
+        private static bool encrypt = true;
     }
 }

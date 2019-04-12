@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonCacheMsal2
+namespace CommonCacheMsalV3
 {
     class Program
     {
@@ -15,7 +15,6 @@ namespace CommonCacheMsal2
         {
             Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
             DoIt().Wait();
-            Console.ReadLine();
         }
 
         static async Task DoIt()
@@ -27,23 +26,31 @@ namespace CommonCacheMsal2
             string cacheFolder = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + @"..\..\..\..");
             string adalV3cacheFileName = Path.Combine(cacheFolder, "cacheAdalV3.bin");
             string unifiedCacheFileName = Path.Combine(cacheFolder, "unifiedCache.bin");
-            TokenCache tokenCache = FilesBasedTokenCacheHelper.GetUserCache(unifiedCacheFileName, adalV3cacheFileName);
 
             AuthenticationResult result;
-            PublicClientApplication app = new PublicClientApplication(v1App.ClientId, v1App.Authority, tokenCache);
+
+            IPublicClientApplication app;
+            app = PublicClientApplicationBuilder.Create(v1App.ClientId)
+                                                .WithAuthority(v1App.Authority)
+                                                .Build();
+            FilesBasedTokenCacheHelper.EnableSerialization(app.UserTokenCache,
+                                                           unifiedCacheFileName,
+                                                           adalV3cacheFileName);
             var accounts = await app.GetAccountsAsync();
             try
             {
-                result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault());
+                result = await app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
+                                  .ExecuteAsync();
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
                 Console.ResetColor();
             }
             catch (MsalUiRequiredException ex)
             {
-                result = await app.AcquireTokenAsync(scopes);
+                result = await app.AcquireTokenInteractive(scopes)
+                                  .ExecuteAsync();
                 Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
             }
         }
-        }
+    }
 }

@@ -330,3 +330,5 @@ ASALocalRun/
 .mfractor/
 /TokenCacheMigration/unifiedCache.bin
 /TokenCacheMigration/cacheAdalV3.bin
+/TokenCacheMigration/unifiedCache.bin.json
+/TokenCacheMigration/prev-cache

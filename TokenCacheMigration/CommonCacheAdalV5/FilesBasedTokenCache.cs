@@ -27,7 +27,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace CommonCacheADAL
+namespace CommonCacheADALV5
 {
     /// <summary>
     /// Simple file based persistent cache implementation for a desktop application (from ADAL 4.x)
@@ -43,16 +43,10 @@ namespace CommonCacheADAL
         public FilesBasedTokenCache(string adalV3FilePath, string unifiedCacheFilePath)
         {
             AdalV3CacheFilePath = adalV3FilePath;
-            this.AfterAccess = AfterAccessNotification;
-            this.UnifiedCacheFilePath = unifiedCacheFilePath;
-            this.BeforeAccess = BeforeAccessNotification;
-            lock (FileLock)
-            {
-                CacheData cacheData = new CacheData();
-                cacheData.AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath);
-                cacheData.UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath);
-                this.DeserializeAdalAndUnifiedCache(cacheData);
-            }
+            AfterAccess = AfterAccessNotification;
+            UnifiedCacheFilePath = unifiedCacheFilePath;
+            BeforeAccess = BeforeAccessNotification;
+            BeforeAccessNotification(null);
         }
 
         // Empties the persistent store.
@@ -69,10 +63,8 @@ namespace CommonCacheADAL
         {
             lock (FileLock)
             {
-                CacheData cacheData = new CacheData();
-                cacheData.AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath);
-                cacheData.UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath);
-                this.DeserializeAdalAndUnifiedCache(cacheData);
+                DeserializeAdalV3(ReadFromFileIfExists(AdalV3CacheFilePath));
+                DeserializeMsalV3(ReadFromFileIfExists(UnifiedCacheFilePath));
             }
         }
 
@@ -85,9 +77,9 @@ namespace CommonCacheADAL
                 lock (FileLock)
                 {
                     // reflect changes in the persistent store
-                    CacheData cacheData = this.SerializeAdalAndUnifiedCache();
-                    WriteToFileIfNotNull(AdalV3CacheFilePath, cacheData.AdalV3State);
-                    WriteToFileIfNotNull(UnifiedCacheFilePath, cacheData.UnifiedState);
+                    WriteToFileIfNotNull(AdalV3CacheFilePath, SerializeAdalV3());
+                    WriteToFileIfNotNull(UnifiedCacheFilePath, SerializeMsalV3());
+
                     // once the write operation took place, restore the HasStateChanged bit to false
                     this.HasStateChanged = false;
                 }
@@ -124,5 +116,4 @@ namespace CommonCacheADAL
             }
         }
     }
-
 }

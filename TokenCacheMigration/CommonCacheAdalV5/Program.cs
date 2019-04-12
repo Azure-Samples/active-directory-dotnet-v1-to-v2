@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonCacheADAL
+namespace CommonCacheADALV5
 {
     class Program
     {
@@ -16,7 +16,6 @@ namespace CommonCacheADAL
         {
             Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
             DoIt().Wait();
-            Console.ReadLine();
         }
 
         static async Task DoIt()
