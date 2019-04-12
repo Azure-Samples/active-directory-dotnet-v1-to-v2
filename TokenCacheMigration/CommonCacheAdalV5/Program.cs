@@ -1,4 +1,5 @@
-﻿using Microsoft.Identity.Client;
+﻿
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonCacheMsal2
+namespace CommonCacheADALV5
 {
     class Program
     {
@@ -15,35 +16,33 @@ namespace CommonCacheMsal2
         {
             Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
             DoIt().Wait();
-            Console.ReadLine();
         }
 
         static async Task DoIt()
         {
-            AppCoordinates.AppCoordinates v1App = AppCoordinates.PreRegisteredApps.GetV1App(useInMsal: true);
+            AppCoordinates.AppCoordinates app = AppCoordinates.PreRegisteredApps.GetV1App(useInMsal: false);
             string resource = AppCoordinates.PreRegisteredApps.MsGraph;
-            string[] scopes = new string[] { resource + "/user.read" };
 
             string cacheFolder = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + @"..\..\..\..");
             string adalV3cacheFileName = Path.Combine(cacheFolder, "cacheAdalV3.bin");
             string unifiedCacheFileName = Path.Combine(cacheFolder, "unifiedCache.bin");
-            TokenCache tokenCache = FilesBasedTokenCacheHelper.GetUserCache(unifiedCacheFileName, adalV3cacheFileName);
+            FilesBasedTokenCache tokenCache = new FilesBasedTokenCache(adalV3cacheFileName, unifiedCacheFileName);
+            AuthenticationContext authenticationContext = new AuthenticationContext(app.Authority, tokenCache);
 
             AuthenticationResult result;
-            PublicClientApplication app = new PublicClientApplication(v1App.ClientId, v1App.Authority, tokenCache);
-            var accounts = await app.GetAccountsAsync();
             try
             {
-                result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault());
+                result = await authenticationContext.AcquireTokenSilentAsync(resource, app.ClientId);
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
+                Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' from the cache");
                 Console.ResetColor();
             }
-            catch (MsalUiRequiredException ex)
+            catch (AdalSilentTokenAcquisitionException)
             {
-                result = await app.AcquireTokenAsync(scopes);
-                Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
+                result = await authenticationContext.AcquireTokenAsync(resource, app.ClientId, app.RedirectUri, new PlatformParameters(PromptBehavior.SelectAccount));
+                Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' without the cache");
             }
+
         }
-        }
+    }
 }

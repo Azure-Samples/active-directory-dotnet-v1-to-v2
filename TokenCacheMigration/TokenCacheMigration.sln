@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCoordinates", "AppCoordi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCacheAdalV3", "CommonCacheAdalv3\CommonCacheAdalV3.csproj", "{F8581623-4EE6-433E-BE4D-08A3301EF28C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCacheAdalV4", "CommonCacheAdalV4\CommonCacheAdalV4.csproj", "{1DE05697-4293-444B-A684-B69C237E1BCB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCacheAdalV5", "CommonCacheAdalV5\CommonCacheAdalV5.csproj", "{1DE05697-4293-444B-A684-B69C237E1BCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCacheMsal2", "CommonCacheMsal2\CommonCacheMsal2.csproj", "{7E0BB109-9BCA-435E-A2B2-103B28A14FBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCacheMsalV3", "CommonCacheMsalV3\CommonCacheMsalV3.csproj", "{7E0BB109-9BCA-435E-A2B2-103B28A14FBF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1E095EB5-726C-47C9-89BB-51E179152594}"
 EndProject
