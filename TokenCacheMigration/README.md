@@ -1,5 +1,9 @@
 # Token cache migration between ADAL.NET 3.x, ADAL.NET 4.x, and MSAL.NET 2.x
 
+> This sample is for ADAL.NET 3.x, ADAL.NET 5.x and MSAL.NET 3.x 
+>
+> For the same sample for ADAL.NET 3.x, ADAL.NET 4.x, and MSAL.NET 2.x, see the [ADAL4-x-MSAL2-x](https://github.com/Azure-Samples/active-directory-dotnet-v1-to-v2/tree/ADAL4-x-MSAL2-x) branch
+
 This solution shows how to customize token cache serialization in a .NET desktop application so that it shares the Single Sign On (SSO) state between:
 
 - [ADAL.NET](https://aka.ms/adalnet) V3.x applications
