@@ -25,7 +25,7 @@ namespace CommonCacheADALV5
 
             string cacheFolder = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + @"..\..\..\..");
             string adalV3cacheFileName = Path.Combine(cacheFolder, "cacheAdalV3.bin");
-            string unifiedCacheFileName = Path.Combine(cacheFolder, "cacheMsal.bin");
+            string unifiedCacheFileName = Path.Combine(cacheFolder, "unifiedCache.bin");
             FilesBasedTokenCache tokenCache = new FilesBasedTokenCache(adalV3cacheFileName, unifiedCacheFileName);
             AuthenticationContext authenticationContext = new AuthenticationContext(app.Authority, tokenCache);
 
