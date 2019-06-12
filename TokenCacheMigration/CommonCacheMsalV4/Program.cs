@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonCacheMsalV3
+namespace CommonCacheMsalV4
 {
     class Program
     {
@@ -42,14 +42,14 @@ namespace CommonCacheMsalV3
                 result = await app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
                                   .ExecuteAsync();
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
+                Console.WriteLine($"Using MSALV4.x got token for '{result.Account.Username}' from the cache");
                 Console.ResetColor();
             }
             catch (MsalUiRequiredException ex)
             {
                 result = await app.AcquireTokenInteractive(scopes)
                                   .ExecuteAsync();
-                Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
+                Console.WriteLine($"Using MSALV4.x got token for '{result.Account.Username}' without the cache");
             }
         }
     }

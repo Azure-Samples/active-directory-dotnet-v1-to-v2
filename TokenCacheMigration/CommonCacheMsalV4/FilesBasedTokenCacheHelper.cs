@@ -30,11 +30,11 @@ using System.IO;
 using System.Security.Cryptography;
 using Microsoft.Identity.Client;
 
-namespace CommonCacheMsalV3
+namespace CommonCacheMsalV4
 {
     /// <summary>
     /// Simple persistent cache implementation of the dual cache serialization (ADAL V3 legacy
-    /// and unified cache format) for a desktop applications (from MSAL 2.x)
+    /// and unified cache format) for a desktop applications (from MSAL 3.x)
     /// </summary>
     static class FilesBasedTokenCacheHelper
     {
@@ -46,7 +46,10 @@ namespace CommonCacheMsalV3
         /// <param name="msalCacheFileName">File name where the cache is serialized with the Unified cache format, common to
         /// ADAL V4 and MSAL V2 and above, and also across ADAL/MSAL on the same platform. Should not be <c>null</c></param>
         /// <returns></returns>
-        public static void EnableSerialization(ITokenCache cache, string msalCacheFileName, string adalV3CacheFileName)
+        public static void EnableSerialization(
+            ITokenCache cache,
+            string msalCacheFileName,
+            string adalV3CacheFileName)
         {
             usertokenCache = cache;
             MsalCacheFileName = msalCacheFileName;
@@ -84,8 +87,8 @@ namespace CommonCacheMsalV3
                 }
                 catch (Exception ex)
                 {
-                    // Compatibility with the MSAL v2 cache if you used one
-                    args.TokenCache.DeserializeMsalV2(ReadFromFileIfExists(MsalCacheFileName));
+                    // Compatibility with the MSAL v3 cache if you used one
+                    args.TokenCache.DeserializeMsalV3(ReadFromFileIfExists(MsalCacheFileName));
                 }
             }
         }

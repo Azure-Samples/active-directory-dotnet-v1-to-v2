@@ -35,16 +35,17 @@ namespace CommonCacheADALV5
     class FilesBasedTokenCache : TokenCache
     {
         public string AdalV3CacheFilePath { get; }
-        public string UnifiedCacheFilePath { get; }
+        public string MsalCacheFilePath { get; }
+
         private static readonly object FileLock = new object();
 
         // Initializes the cache against a local file.
-        // If the file is already rpesent, it loads its content in the ADAL cache
-        public FilesBasedTokenCache(string adalV3FilePath, string unifiedCacheFilePath)
+        // If the file is already present, it loads its content in the ADAL cache
+        public FilesBasedTokenCache(string adalV3FilePath, string msalCacheFilePath)
         {
             AdalV3CacheFilePath = adalV3FilePath;
             AfterAccess = AfterAccessNotification;
-            UnifiedCacheFilePath = unifiedCacheFilePath;
+            MsalCacheFilePath = msalCacheFilePath;
             BeforeAccess = BeforeAccessNotification;
             BeforeAccessNotification(null);
         }
@@ -54,7 +55,7 @@ namespace CommonCacheADALV5
         {
             base.Clear();
             File.Delete(AdalV3CacheFilePath);
-            File.Delete(UnifiedCacheFilePath);
+            File.Delete(MsalCacheFilePath);
         }
 
         // Triggered right before ADAL needs to access the cache.
@@ -64,7 +65,7 @@ namespace CommonCacheADALV5
             lock (FileLock)
             {
                 DeserializeAdalV3(ReadFromFileIfExists(AdalV3CacheFilePath));
-                DeserializeMsalV3(ReadFromFileIfExists(UnifiedCacheFilePath));
+                DeserializeMsalV3(ReadFromFileIfExists(MsalCacheFilePath));
             }
         }
 
@@ -78,7 +79,7 @@ namespace CommonCacheADALV5
                 {
                     // reflect changes in the persistent store
                     WriteToFileIfNotNull(AdalV3CacheFilePath, SerializeAdalV3());
-                    WriteToFileIfNotNull(UnifiedCacheFilePath, SerializeMsalV3());
+                    WriteToFileIfNotNull(MsalCacheFilePath, SerializeMsalV3());
 
                     // once the write operation took place, restore the HasStateChanged bit to false
                     this.HasStateChanged = false;
