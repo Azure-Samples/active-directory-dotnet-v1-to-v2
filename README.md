@@ -2,7 +2,6 @@
 page_type: sample
 languages:
 - csharp
-- batchfile
 products:
 - azure
 description: "This sample gathers Visual Studio solutions illustrating the migration of Azure AD v1.0 applications (using ADAL.NET) to Azure AD v2.0 applications, also named converged applications (using MSAL.NET)."
