@@ -29,7 +29,7 @@ git clone https://github.com/Azure-Samples/active-directory-dotnet-v1-to-v2
 cd active-directory-dotnet-v1-to-v2
 ```
 
-   Then go to each sub folder to see a particular aspect of the migration
+Then go to each sub folder to see a particular aspect of the migration
 
 ## Resources
 
