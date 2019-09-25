@@ -3,7 +3,7 @@ page_type: sample
 languages:
 - csharp
 products:
-- azure
+- azure-active-directory
 description: "This sample gathers Visual Studio solutions illustrating the migration of Azure AD v1.0 applications (using ADAL.NET) to Azure AD v2.0 applications, also named converged applications (using MSAL.NET)."
 urlFragment: active-directory-dotnet-v1-to-v2
 ---
