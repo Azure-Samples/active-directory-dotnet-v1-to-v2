@@ -15,6 +15,7 @@ namespace CommonCacheMsalV4
         {
             Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
             DoIt().Wait();
+            Console.ReadLine();
         }
 
         static async Task DoIt()
