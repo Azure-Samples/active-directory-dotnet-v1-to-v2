@@ -12,6 +12,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCacheMsalV3", "CommonCacheMsalV3\CommonCacheMsalV3.csproj", "{7E0BB109-9BCA-435E-A2B2-103B28A14FBF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1E095EB5-726C-47C9-89BB-51E179152594}"
+	ProjectSection(SolutionItems) = preProject
+		TestAll-no-prompt.bat = TestAll-no-prompt.bat
+		TestAll.bat = TestAll.bat
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".NET FW", ".NET FW", "{19F69065-3DDE-402C-A761-886D3626B126}"
 EndProject
