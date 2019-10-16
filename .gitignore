@@ -332,3 +332,4 @@ ASALocalRun/
 /TokenCacheMigration/cacheAdalV3.bin
 /TokenCacheMigration/unifiedCache.bin.json
 /TokenCacheMigration/prev-cache
+/TokenCacheMigration/cacheMsal.bin
