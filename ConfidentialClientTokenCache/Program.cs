@@ -1,4 +1,7 @@
-﻿using Microsoft.Azure.Cosmos.Fluent;
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
