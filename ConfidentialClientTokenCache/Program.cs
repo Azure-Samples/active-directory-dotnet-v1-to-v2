@@ -165,7 +165,6 @@ namespace ConfidentialClientTokenCache
         }
     }
 
-
     /// <summary>
     /// Extension class used to add an in-memory token cache serializer to MSAL.
     /// </summary>
