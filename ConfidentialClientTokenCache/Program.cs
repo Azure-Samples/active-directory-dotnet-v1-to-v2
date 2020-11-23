@@ -38,7 +38,7 @@ namespace ConfidentialClientTokenCache
         static async Task Main(string[] args)
         {
             string clientId = "812287fd-3ea3-49c6-b4ab-e8d41dea1f17";
-            string clientSecret = "[Enter here the tenantID or domain name for your Azure AD tenant]";
+            string clientSecret = "[Enter here the secret register with your application]";
             string tenant = "msidentitysamplestesting.onmicrosoft.com";
             string[] scopes = new[] { "api://2d96f90e-a1a7-4ef5-b15c-87758986eb1a/.default" };
 
