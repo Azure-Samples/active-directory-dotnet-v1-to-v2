@@ -62,7 +62,6 @@ namespace ConfidentialClientTokenCache
             result = await app.AcquireTokenForClient(scopes)
                 .ExecuteAsync();
             Console.WriteLine(result.AuthenticationResultMetadata.TokenSource);
-
         }
 
         /// <summary>
