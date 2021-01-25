@@ -21,6 +21,17 @@ This solution provides three .NET desktop console applications and one common li
 
 ![image](https://user-images.githubusercontent.com/13203188/45534630-a5e25200-b7b0-11e8-98ca-0e21c3df1176.png)
 
+### Disabling legacy token cache
+MSAL has some internal code specifically to enable the ability to interact with legacy ADAL cache. When MSAL and ADAL are not used side-by-side (therefore the legacy cache is not used), the related legacy cache code is unnecessary. MSAL [4.25.0](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.25.0) adds the ability to disable legacy ADAL cache code and improve cache usage performance. See pull request [#2309](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2309) for performance comparison before and after disabling the legacy cache. Call `.WithLegacyCacheCompatibility(false)` on an application builder like below.
+
+```csharp
+var app = ConfidentialClientApplicationBuilder
+	.Create(clientId)
+	.WithClientSecret(clientSecret)
+	.WithLegacyCacheCompatibility(false)
+	.Build();
+```
+
 ## Getting Started
 
 1. Clone this repository
@@ -47,7 +58,7 @@ This solution provides three .NET desktop console applications and one common li
 - [Token cache serialization](https://aka.ms/adal-net-token-cache-serialization) in ADAL.NET:
   - [legacy](https://aka.ms/adal-net-token-cache-serialization-legacy) token cache serialization (ADAL V3 format)
   - [unified cache](https://aka.ms/adal-net-token-cache-serialization-unified) token cache serialization
-- Token cache serialization in MSAL.NET
+- [Token cache serialization](https://aka.ms/msal-net-token-cache-serialization) in MSAL.NET
 
 ### About ADAL.NET and MSAL.NET
 
