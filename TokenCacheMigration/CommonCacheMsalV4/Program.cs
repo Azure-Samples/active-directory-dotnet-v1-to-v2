@@ -13,17 +13,19 @@ namespace CommonCacheMsalV4
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("--------------------------------------------------------------------------");
             Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
-            DoIt().Wait();
+            DoIt(args.Contains("-disable-legacy-cache")).Wait();
 
             // Unless ran in a batch, let the user press return to continue
             if (args.Length == 0)
             {
                 Console.ReadLine();
             }
+            Console.WriteLine("--------------------------------------------------------------------------");
         }
 
-        static async Task DoIt()
+        static async Task DoIt(bool disableLegacyCache)
         {
             AppCoordinates.AppCoordinates v1App = AppCoordinates.PreRegisteredApps.GetV1App(useInMsal: true);
             string resource = AppCoordinates.PreRegisteredApps.MsGraph;
@@ -35,10 +37,17 @@ namespace CommonCacheMsalV4
 
             AuthenticationResult result;
 
-            IPublicClientApplication app;
-            app = PublicClientApplicationBuilder.Create(v1App.ClientId)
-                                                .WithAuthority(v1App.Authority)
-                                                .Build();
+
+            PublicClientApplicationBuilder builder = PublicClientApplicationBuilder.Create(v1App.ClientId)
+                                                .WithAuthority(v1App.Authority);
+             
+            if (disableLegacyCache)
+            {
+                Console.WriteLine("Disabled legacy cache.");
+                builder.WithLegacyCacheCompatibility(false);
+            }
+                                                
+            IPublicClientApplication app = builder.Build();
             FilesBasedTokenCacheHelper.EnableSerialization(app.UserTokenCache,
                                                            msalCacheFileName,
                                                            adalV3cacheFileName);

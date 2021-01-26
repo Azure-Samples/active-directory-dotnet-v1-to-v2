@@ -14,6 +14,7 @@ namespace CommonCacheADALV5
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("--------------------------------------------------------------------------");
             Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
             DoIt().Wait();
 
@@ -22,6 +23,7 @@ namespace CommonCacheADALV5
             {
                 Console.ReadLine();
             }
+            Console.WriteLine("--------------------------------------------------------------------------");
         }
 
         static async Task DoIt()
