@@ -5,6 +5,7 @@ using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
@@ -41,6 +42,10 @@ namespace ConfidentialClientTokenCache
             string clientSecret = "[Enter here the secret register with your application]";
             string tenant = "msidentitysamplestesting.onmicrosoft.com";
             string[] scopes = new[] { "api://2d96f90e-a1a7-4ef5-b15c-87758986eb1a/.default" };
+            string keyVaultContainer = "https://buildautomation.vault.azure.net";
+            string keyVaultReference = "AzureADIdentityDivisionTestAgentCert";
+
+            CertificateDescription certDescription = CertificateDescription.FromKeyVault(keyVaultContainer, keyVaultReference);
 
             CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory;
 
@@ -50,7 +55,8 @@ namespace ConfidentialClientTokenCache
             // Create the confidential client application
             IConfidentialClientApplication app;
             app = ConfidentialClientApplicationBuilder.Create(clientId)
-                .WithClientSecret(clientSecret)
+                //.WithClientSecret(clientSecret)
+                .WithCertificate(certDescription.Certificate)
                 .WithTenantId(tenant)
                 .Build();
 
