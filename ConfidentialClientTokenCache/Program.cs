@@ -132,6 +132,7 @@ namespace ConfidentialClientTokenCache
                 case CacheImplementationDemo.CosmosDb:
                     // Redis token cache
                     // Requires to reference Microsoft.Extensions.Caching.Cosmos (preview)
+                    services.AddDistributedTokenCaches();
                     services.AddCosmosCache((CosmosCacheOptions cacheOptions) =>
                     {
                         cacheOptions.ContainerName = Configuration["CosmosCacheContainer"];
