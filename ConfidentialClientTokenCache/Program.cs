@@ -5,6 +5,7 @@ using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
@@ -37,10 +38,16 @@ namespace ConfidentialClientTokenCache
     {
         static async Task Main(string[] args)
         {
-            string clientId = "812287fd-3ea3-49c6-b4ab-e8d41dea1f17";
-            string clientSecret = "[Enter here the secret register with your application]";
+            string clientId = "6af093f3-b445-4b7a-beae-046864468ad6";
             string tenant = "msidentitysamplestesting.onmicrosoft.com";
-            string[] scopes = new[] { "api://2d96f90e-a1a7-4ef5-b15c-87758986eb1a/.default" };
+            string[] scopes = new[] { "api://8206b76f-586e-4098-b1e5-598c1aa3e2a1/.default" };
+
+            // Certificate
+            string keyVaultContainer = "https://WebAppsApisTests.vault.azure.net";
+            string keyVaultReference = "MsIdWebScenarioTestCert";
+            CertificateDescription certDescription = CertificateDescription.FromKeyVault(keyVaultContainer, keyVaultReference);
+            ICertificateLoader certificateLoader = new DefaultCertificateLoader();
+            certificateLoader.LoadIfNeeded(certDescription);
 
             CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory;
 
@@ -50,7 +57,8 @@ namespace ConfidentialClientTokenCache
             // Create the confidential client application
             IConfidentialClientApplication app;
             app = ConfidentialClientApplicationBuilder.Create(clientId)
-                .WithClientSecret(clientSecret)
+                // Alternatively to the certificate you can use .WithClientSecret(clientSecret)
+                .WithCertificate(certDescription.Certificate)
                 .WithTenantId(tenant)
                 .Build();
 
