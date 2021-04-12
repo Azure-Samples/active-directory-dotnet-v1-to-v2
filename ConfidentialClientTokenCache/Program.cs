@@ -62,8 +62,8 @@ namespace ConfidentialClientTokenCache
                 .WithTenantId(tenant)
                 .Build();
 
-            await msalTokenCacheProvider.InitializeAsync(app.UserTokenCache);
-            await msalTokenCacheProvider.InitializeAsync(app.AppTokenCache);
+            msalTokenCacheProvider.Initialize(app.UserTokenCache);
+            msalTokenCacheProvider.Initialize(app.AppTokenCache);
 
             // Acquire a token (twice)
             var result = await app.AcquireTokenForClient(scopes)
