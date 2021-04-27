@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0; net472</TargetFrameworks>
+    <TargetFrameworks>net5.0; net472; net462; netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.Caching.SqlServer" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="1.9.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.9.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
