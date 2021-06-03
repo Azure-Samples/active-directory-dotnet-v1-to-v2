@@ -82,7 +82,8 @@ namespace ConfidentialClientTokenCache
         /// </summary>
         /// <param name="cacheImplementation">implementation for the token cache</param>
         /// <returns>An MSAL Token cache provider</returns>
-        private static IMsalTokenCacheProvider CreateTokenCache(CacheImplementationDemo cacheImplementation = CacheImplementationDemo.StackExchangeRedis)
+        private static IMsalTokenCacheProvider CreateTokenCache(
+            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.DistributedMemory)
         {
             IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
             .ConfigureLogging(l => { })
@@ -101,7 +102,9 @@ namespace ConfidentialClientTokenCache
         /// </summary>
         /// <param name="cacheImplementation">implementation for the token cache</param>
         /// <returns>An MSAL Token cache provider</returns>
-        private static void ConfigureCache(CacheImplementationDemo cacheImplementation, IServiceCollection services)
+        private static void ConfigureCache(
+            CacheImplementationDemo cacheImplementation,
+            IServiceCollection services)
         {
             // (Simulates the configuration, could be a IConfiguration or anything)
             Dictionary<string, string> Configuration = new Dictionary<string, string>();
@@ -145,7 +148,7 @@ namespace ConfidentialClientTokenCache
                     services.AddDistributedTokenCaches();
                     services.AddStackExchangeRedisCache(options =>
                     {
-                        options.Configuration = "localhost:5002";
+                        options.Configuration = "localhost";
                         options.InstanceName = "Redis";
                     });
                     break;
