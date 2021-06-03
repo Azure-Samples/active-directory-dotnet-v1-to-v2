@@ -4,6 +4,8 @@
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders;
@@ -49,7 +51,7 @@ namespace ConfidentialClientTokenCache
             ICertificateLoader certificateLoader = new DefaultCertificateLoader();
             certificateLoader.LoadIfNeeded(certDescription);
 
-            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory;
+            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.DistributedMemory;
 
             // Create the token cache (4 possible implementations)
             IMsalTokenCacheProvider msalTokenCacheProvider = CreateTokenCache(cacheImplementation);
@@ -79,11 +81,28 @@ namespace ConfidentialClientTokenCache
         /// Creates a token cache (implementation of your choice)
         /// </summary>
         /// <param name="cacheImplementation">implementation for the token cache</param>
-        /// <returns>An Msal Token cache provider</returns>
-        private static IMsalTokenCacheProvider CreateTokenCache(CacheImplementationDemo cacheImplementation=CacheImplementationDemo.InMemory)
+        /// <returns>An MSAL Token cache provider</returns>
+        private static IMsalTokenCacheProvider CreateTokenCache(CacheImplementationDemo cacheImplementation = CacheImplementationDemo.StackExchangeRedis)
         {
-            IServiceCollection services = new ServiceCollection();
+            IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
+            .ConfigureLogging(l => { })
+            .ConfigureServices(services =>
+            {
+                ConfigureCache(cacheImplementation, services);
+            });
 
+            IServiceProvider serviceProvider = hostBuilder.Build().Services;
+            IMsalTokenCacheProvider msalTokenCacheProvider = serviceProvider.GetRequiredService<IMsalTokenCacheProvider>();
+            return msalTokenCacheProvider;
+        }
+
+        /// <summary>
+        /// Creates a token cache (implementation of your choice)
+        /// </summary>
+        /// <param name="cacheImplementation">implementation for the token cache</param>
+        /// <returns>An MSAL Token cache provider</returns>
+        private static void ConfigureCache(CacheImplementationDemo cacheImplementation, IServiceCollection services)
+        {
             // (Simulates the configuration, could be a IConfiguration or anything)
             Dictionary<string, string> Configuration = new Dictionary<string, string>();
 
@@ -126,8 +145,8 @@ namespace ConfidentialClientTokenCache
                     services.AddDistributedTokenCaches();
                     services.AddStackExchangeRedisCache(options =>
                     {
-                        options.Configuration = "localhost";
-                        options.InstanceName = "SampleInstance";
+                        options.Configuration = "localhost:5002";
+                        options.InstanceName = "Redis";
                     });
                     break;
 
@@ -147,10 +166,6 @@ namespace ConfidentialClientTokenCache
                 default:
                     break;
             }
-
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-            IMsalTokenCacheProvider msalTokenCacheProvider = serviceProvider.GetRequiredService<IMsalTokenCacheProvider>();
-            return msalTokenCacheProvider;
         }
     }
 }
