@@ -51,7 +51,7 @@ namespace ConfidentialClientTokenCache
             ICertificateLoader certificateLoader = new DefaultCertificateLoader();
             certificateLoader.LoadIfNeeded(certDescription);
 
-            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.DistributedMemory;
+            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory;
 
             // Create the token cache (4 possible implementations)
             IMsalTokenCacheProvider msalTokenCacheProvider = CreateTokenCache(cacheImplementation);
@@ -83,7 +83,7 @@ namespace ConfidentialClientTokenCache
         /// <param name="cacheImplementation">implementation for the token cache</param>
         /// <returns>An MSAL Token cache provider</returns>
         private static IMsalTokenCacheProvider CreateTokenCache(
-            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.DistributedMemory)
+            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory)
         {
             IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
             .ConfigureLogging(l => { })
