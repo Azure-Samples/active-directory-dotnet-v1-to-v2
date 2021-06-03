@@ -4,6 +4,8 @@
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders;
@@ -79,11 +81,31 @@ namespace ConfidentialClientTokenCache
         /// Creates a token cache (implementation of your choice)
         /// </summary>
         /// <param name="cacheImplementation">implementation for the token cache</param>
-        /// <returns>An Msal Token cache provider</returns>
-        private static IMsalTokenCacheProvider CreateTokenCache(CacheImplementationDemo cacheImplementation=CacheImplementationDemo.InMemory)
+        /// <returns>An MSAL Token cache provider</returns>
+        private static IMsalTokenCacheProvider CreateTokenCache(
+            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory)
         {
-            IServiceCollection services = new ServiceCollection();
+            IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
+            .ConfigureLogging(l => { })
+            .ConfigureServices(services =>
+            {
+                ConfigureCache(cacheImplementation, services);
+            });
 
+            IServiceProvider serviceProvider = hostBuilder.Build().Services;
+            IMsalTokenCacheProvider msalTokenCacheProvider = serviceProvider.GetRequiredService<IMsalTokenCacheProvider>();
+            return msalTokenCacheProvider;
+        }
+
+        /// <summary>
+        /// Creates a token cache (implementation of your choice)
+        /// </summary>
+        /// <param name="cacheImplementation">implementation for the token cache</param>
+        /// <returns>An MSAL Token cache provider</returns>
+        private static void ConfigureCache(
+            CacheImplementationDemo cacheImplementation,
+            IServiceCollection services)
+        {
             // (Simulates the configuration, could be a IConfiguration or anything)
             Dictionary<string, string> Configuration = new Dictionary<string, string>();
 
@@ -127,7 +149,7 @@ namespace ConfidentialClientTokenCache
                     services.AddStackExchangeRedisCache(options =>
                     {
                         options.Configuration = "localhost";
-                        options.InstanceName = "SampleInstance";
+                        options.InstanceName = "Redis";
                     });
                     break;
 
@@ -147,10 +169,6 @@ namespace ConfidentialClientTokenCache
                 default:
                     break;
             }
-
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-            IMsalTokenCacheProvider msalTokenCacheProvider = serviceProvider.GetRequiredService<IMsalTokenCacheProvider>();
-            return msalTokenCacheProvider;
         }
     }
 }
