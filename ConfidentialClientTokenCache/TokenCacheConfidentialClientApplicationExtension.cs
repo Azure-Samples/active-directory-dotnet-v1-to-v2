@@ -35,6 +35,21 @@ namespace ConfidentialClientTokenCache
         ///  });
         /// </code>
         /// 
+        /// The following code adds a token cache based on REDIS.
+        /// 
+        /// <code>
+        ///  app.UseTokenCaches(services =>
+        ///  {
+        ///       services.AddDistributedTokenCaches();
+        ///       // Redis token cache
+        ///       // Requires to reference Microsoft.Extensions.Caching.StackExchangeRedis
+        ///       services.AddStackExchangeRedisCache(options =>
+        ///       {
+        ///           options.Configuration = "localhost";
+        ///           options.InstanceName = "Redis";
+        ///       });
+        ///  });
+        /// </code>
         /// 
         /// </example>
         public static IConfidentialClientApplication UseTokenCaches(
