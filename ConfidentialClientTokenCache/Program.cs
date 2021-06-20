@@ -4,11 +4,8 @@
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.TokenCacheProviders;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
 using System;
@@ -51,11 +48,6 @@ namespace ConfidentialClientTokenCache
             ICertificateLoader certificateLoader = new DefaultCertificateLoader();
             certificateLoader.LoadIfNeeded(certDescription);
 
-            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory;
-
-            // Create the token cache (4 possible implementations)
-            IMsalTokenCacheProvider msalTokenCacheProvider = CreateTokenCache(cacheImplementation);
-
             // Create the confidential client application
             IConfidentialClientApplication app;
             app = ConfidentialClientApplicationBuilder.Create(clientId)
@@ -64,9 +56,12 @@ namespace ConfidentialClientTokenCache
                 .WithTenantId(tenant)
                 .Build();
 
-            msalTokenCacheProvider.Initialize(app.UserTokenCache);
-            msalTokenCacheProvider.Initialize(app.AppTokenCache);
 
+            app.UseTokenCache(services =>
+            {
+                ConfigureCache(CacheImplementationDemo.InMemory, services);
+            });
+ 
             // Acquire a token (twice)
             var result = await app.AcquireTokenForClient(scopes)
                 .ExecuteAsync();
@@ -75,26 +70,6 @@ namespace ConfidentialClientTokenCache
             result = await app.AcquireTokenForClient(scopes)
                 .ExecuteAsync();
             Console.WriteLine(result.AuthenticationResultMetadata.TokenSource);
-        }
-
-        /// <summary>
-        /// Creates a token cache (implementation of your choice)
-        /// </summary>
-        /// <param name="cacheImplementation">implementation for the token cache</param>
-        /// <returns>An MSAL Token cache provider</returns>
-        private static IMsalTokenCacheProvider CreateTokenCache(
-            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory)
-        {
-            IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
-            .ConfigureLogging(l => { })
-            .ConfigureServices(services =>
-            {
-                ConfigureCache(cacheImplementation, services);
-            });
-
-            IServiceProvider serviceProvider = hostBuilder.Build().Services;
-            IMsalTokenCacheProvider msalTokenCacheProvider = serviceProvider.GetRequiredService<IMsalTokenCacheProvider>();
-            return msalTokenCacheProvider;
         }
 
         /// <summary>
