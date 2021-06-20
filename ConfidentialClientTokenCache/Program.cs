@@ -56,8 +56,8 @@ namespace ConfidentialClientTokenCache
                 .WithTenantId(tenant)
                 .Build();
 
-
-            app.UseTokenCache(services =>
+            // Add a token cache (several serialization technologies possible)
+            app.UseTokenCaches(services =>
             {
                 ConfigureCache(CacheImplementationDemo.InMemory, services);
             });
@@ -81,9 +81,6 @@ namespace ConfidentialClientTokenCache
             CacheImplementationDemo cacheImplementation,
             IServiceCollection services)
         {
-            // (Simulates the configuration, could be a IConfiguration or anything)
-            Dictionary<string, string> Configuration = new Dictionary<string, string>();
-
             switch (cacheImplementation)
             {
                 case CacheImplementationDemo.InMemory:
@@ -129,6 +126,9 @@ namespace ConfidentialClientTokenCache
                     break;
 
                 case CacheImplementationDemo.CosmosDb:
+                    // (Simulates the configuration, could be a IConfiguration or anything)
+                    Dictionary<string, string> Configuration = new Dictionary<string, string>();
+
                     // Redis token cache
                     // Requires to reference Microsoft.Extensions.Caching.Cosmos (preview)
                     services.AddDistributedTokenCaches();

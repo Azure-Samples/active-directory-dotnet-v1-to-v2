@@ -55,15 +55,25 @@ namespace ConfidentialClientTokenCache
                 .WithCertificate(certDescription.Certificate)
                 .WithTenantId(tenant)
                 .Build();
-            
-            app.UseInMemoryTokenCache();
-/*
+
+            app.UseInMemoryTokenCaches();
+
             // Or
 
             app.UseDistributedTokenCache(services =>
             {
                 // In memory distributed token cache
                 // In net472, requires to reference Microsoft.Extensions.Caching.Memory
+                services.AddDistributedMemoryCache();
+            });
+
+            // Or
+
+            app.UseTokenCaches(services =>
+            {
+                // In memory distributed token cache
+                // In net472, requires to reference Microsoft.Extensions.Caching.Memory
+                services.AddDistributedTokenCaches();
                 services.AddDistributedMemoryCache();
             });
 
@@ -87,8 +97,33 @@ namespace ConfidentialClientTokenCache
                 });
             });
 
-            app.UseDistributedTokenCache(services =>
+            // Or
+
+            app.UseTokenCaches(services =>
             {
+                services.AddDistributedTokenCaches();
+                services.AddDistributedSqlServerCache(options =>
+                {
+                    // In net472, requires to reference Microsoft.Extensions.Caching.Memory
+                    // SQL Server token cache
+                    // Requires to reference Microsoft.Extensions.Caching.SqlServer
+                    options.ConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TestCache;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+                    options.SchemaName = "dbo";
+                    options.TableName = "TestCache";
+
+                    // You don't want the SQL token cache to be purged before the access token has expired. Usually
+                    // access tokens expire after 1 hour (but this can be changed by token lifetime policies), whereas
+                    // the default sliding expiration for the distributed SQL database is 20 mins. 
+                    // Use a value which is above 60 mins (or the lifetime of a token in case of longer lived tokens)
+                    options.DefaultSlidingExpiration = TimeSpan.FromMinutes(90);
+                });
+            });
+
+            // Or 
+
+            app.UseTokenCaches(services =>
+            {
+                services.AddDistributedTokenCaches();
                 // Redis token cache
                 // Requires to reference Microsoft.Extensions.Caching.StackExchangeRedis
                 services.AddStackExchangeRedisCache(options =>
@@ -98,8 +133,15 @@ namespace ConfidentialClientTokenCache
                 });
             });
 
-            app.UseDistributedTokenCache(services =>
+            // Or
+
+            app.UseTokenCaches(services =>
             {
+                services.AddDistributedTokenCaches();
+
+                // (Simulates the configuration, could be a IConfiguration or anything)
+                Dictionary<string, string> Configuration = new Dictionary<string, string>();
+
                 // Redis token cache
                 // Requires to reference Microsoft.Extensions.Caching.Cosmos (preview)
                 services.AddCosmosCache((CosmosCacheOptions cacheOptions) =>
@@ -110,7 +152,6 @@ namespace ConfidentialClientTokenCache
                     cacheOptions.CreateIfNotExists = true;
                 });
             });
-*/
 
             // Acquire a token (twice)
             var result = await app.AcquireTokenForClient(scopes)
