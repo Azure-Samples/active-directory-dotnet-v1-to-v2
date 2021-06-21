@@ -43,7 +43,7 @@ namespace ConfidentialClientTokenCache
 
             // Certificate
             string keyVaultContainer = "https://WebAppsApisTests.vault.azure.net";
-            string keyVaultReference = "MsIdWebScenarioTestCert";
+            string keyVaultReference = "Self-Signed-5-5-22";
             CertificateDescription certDescription = CertificateDescription.FromKeyVault(keyVaultContainer, keyVaultReference);
             ICertificateLoader certificateLoader = new DefaultCertificateLoader();
             certificateLoader.LoadIfNeeded(certDescription);
@@ -120,8 +120,8 @@ namespace ConfidentialClientTokenCache
                     services.AddDistributedTokenCaches();
                     services.AddStackExchangeRedisCache(options =>
                     {
-                        options.Configuration = "localhost";
-                        options.InstanceName = "Redis";
+                        options.Configuration = "localhost:5002"; // configured w/docker
+                        options.InstanceName = "RedisDemos_";
                     });
                     break;
 
@@ -129,7 +129,7 @@ namespace ConfidentialClientTokenCache
                     // (Simulates the configuration, could be a IConfiguration or anything)
                     Dictionary<string, string> Configuration = new Dictionary<string, string>();
 
-                    // Redis token cache
+                    // Cosmos DB token cache
                     // Requires to reference Microsoft.Extensions.Caching.Cosmos (preview)
                     services.AddDistributedTokenCaches();
                     services.AddCosmosCache((CosmosCacheOptions cacheOptions) =>
