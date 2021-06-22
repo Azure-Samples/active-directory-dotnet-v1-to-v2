@@ -50,13 +50,13 @@ namespace ConfidentialClientTokenCache
                 .Build();
 
             // Distributed in memory token caches (App and User caches)
-            app.AddInMemoryTokenCaches();
+            app.AddInMemoryTokenCache();
 
             // Or
 
             // Distributed token caches (App and User caches)
             // Add one of the below: SQL, Redis, CosmosDb
-            app.AddDistributedTokenCaches(services =>
+            app.AddDistributedTokenCache(services =>
             {
                 services.AddDistributedSqlServerCache(options =>
                 {
@@ -73,13 +73,16 @@ namespace ConfidentialClientTokenCache
                     options.DefaultSlidingExpiration = TimeSpan.FromMinutes(90);
                 });
 
+                /* Remove comments to use Redis cache implementation
                 // Add Redis
                 services.AddStackExchangeRedisCache(options =>
                 {
                     options.Configuration = "localhost";
                     options.InstanceName = "Redis";
                 });
+                */
 
+                /* Remove comments to use CosmosDB cache implementation
                 // Add CosmosDB
                 services.AddCosmosCache((CosmosCacheOptions cacheOptions) =>
                 {
@@ -88,6 +91,7 @@ namespace ConfidentialClientTokenCache
                     cacheOptions.ClientBuilder = new CosmosClientBuilder(Configuration["CosmosConnectionString"]);
                     cacheOptions.CreateIfNotExists = true;
                 });
+                */
             });
 
             // Acquire a token (twice)
