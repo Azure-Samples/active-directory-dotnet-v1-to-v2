@@ -58,6 +58,9 @@ namespace ConfidentialClientTokenCache
             // Add one of the below: SQL, Redis, CosmosDb
             app.AddDistributedTokenCache(services =>
             {
+                services.AddDistributedMemoryCache();
+
+                /* Remove comments to use SQL cache implementation
                 services.AddDistributedSqlServerCache(options =>
                 {
                     // SQL Server token cache
@@ -72,6 +75,7 @@ namespace ConfidentialClientTokenCache
                     // Use a value which is above 60 mins (or the lifetime of a token in case of longer lived tokens)
                     options.DefaultSlidingExpiration = TimeSpan.FromMinutes(90);
                 });
+                */
 
                 /* Remove comments to use Redis cache implementation
                 // Add Redis
