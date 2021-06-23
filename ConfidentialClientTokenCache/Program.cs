@@ -36,7 +36,7 @@ namespace ConfidentialClientTokenCache
 
             // Certificate Loading
             string keyVaultContainer = "https://WebAppsApisTests.vault.azure.net";
-            string keyVaultReference = "MsIdWebScenarioTestCert";
+            string keyVaultReference = "Self-Signed-5-5-22";
             CertificateDescription certDescription = CertificateDescription.FromKeyVault(keyVaultContainer, keyVaultReference);
             ICertificateLoader certificateLoader = new DefaultCertificateLoader();
             certificateLoader.LoadIfNeeded(certDescription);
