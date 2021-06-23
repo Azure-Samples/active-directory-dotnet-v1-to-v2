@@ -18,19 +18,6 @@ using System.Threading.Tasks;
 namespace ConfidentialClientTokenCache
 {
     /// <summary>
-    /// Choice of token cache serialization implementation
-    /// (this is for the sample)
-    /// </summary>
-    public enum CacheImplementationDemo
-    {
-        InMemory,
-        DistributedMemory,
-        DistributedSqlServer,
-        StackExchangeRedis,
-        CosmosDb
-    }
-
-    /// <summary>
     /// The goal of this little sample is to show how you can use MSAL token cache adapters
     /// in confidential client applications both in .NET Core, or .NET Framework 4.7.2
     /// Note that if you write a .NET Core web app or web API, Microsoft recommends that you use the
@@ -44,17 +31,15 @@ namespace ConfidentialClientTokenCache
             string tenant = "msidentitysamplestesting.onmicrosoft.com";
             string[] scopes = new[] { "api://8206b76f-586e-4098-b1e5-598c1aa3e2a1/.default" };
 
-            // Certificate
+            // Simulates the configuration, could be a IConfiguration or anything
+            Dictionary<string, string> Configuration = new Dictionary<string, string>();
+
+            // Certificate Loading
             string keyVaultContainer = "https://WebAppsApisTests.vault.azure.net";
-            string keyVaultReference = "MsIdWebScenarioTestCert";
+            string keyVaultReference = "Self-Signed-5-5-22";
             CertificateDescription certDescription = CertificateDescription.FromKeyVault(keyVaultContainer, keyVaultReference);
             ICertificateLoader certificateLoader = new DefaultCertificateLoader();
             certificateLoader.LoadIfNeeded(certDescription);
-
-            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory;
-
-            // Create the token cache (4 possible implementations)
-            IMsalTokenCacheProvider msalTokenCacheProvider = CreateTokenCache(cacheImplementation);
 
             // Create the confidential client application
             IConfidentialClientApplication app;
@@ -64,8 +49,54 @@ namespace ConfidentialClientTokenCache
                 .WithTenantId(tenant)
                 .Build();
 
-            msalTokenCacheProvider.Initialize(app.UserTokenCache);
-            msalTokenCacheProvider.Initialize(app.AppTokenCache);
+            // Distributed in memory token caches (App and User caches)
+            app.AddInMemoryTokenCache();
+
+            // Or
+
+            // Distributed token caches (App and User caches)
+            // Add one of the below: SQL, Redis, CosmosDb
+            app.AddDistributedTokenCache(services =>
+            {
+                services.AddDistributedMemoryCache();
+
+                /* Remove comments to use SQL cache implementation
+                services.AddDistributedSqlServerCache(options =>
+                {
+                    // SQL Server token cache
+                    // Requires to reference Microsoft.Extensions.Caching.SqlServer
+                    options.ConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TestCache;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+                    options.SchemaName = "dbo";
+                    options.TableName = "TestCache";
+
+                    // You don't want the SQL token cache to be purged before the access token has expired. Usually
+                    // access tokens expire after 1 hour (but this can be changed by token lifetime policies), whereas
+                    // the default sliding expiration for the distributed SQL database is 20 mins. 
+                    // Use a value which is above 60 mins (or the lifetime of a token in case of longer lived tokens)
+                    options.DefaultSlidingExpiration = TimeSpan.FromMinutes(90);
+                });
+                */
+
+                /* Remove comments to use Redis cache implementation
+                // Add Redis
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = "localhost";
+                    options.InstanceName = "Redis";
+                });
+                */
+
+                /* Remove comments to use CosmosDB cache implementation
+                // Add CosmosDB
+                services.AddCosmosCache((CosmosCacheOptions cacheOptions) =>
+                {
+                    cacheOptions.ContainerName = Configuration["CosmosCacheContainer"];
+                    cacheOptions.DatabaseName = Configuration["CosmosCacheDatabase"];
+                    cacheOptions.ClientBuilder = new CosmosClientBuilder(Configuration["CosmosConnectionString"]);
+                    cacheOptions.CreateIfNotExists = true;
+                });
+                */
+            });
 
             // Acquire a token (twice)
             var result = await app.AcquireTokenForClient(scopes)
@@ -75,100 +106,6 @@ namespace ConfidentialClientTokenCache
             result = await app.AcquireTokenForClient(scopes)
                 .ExecuteAsync();
             Console.WriteLine(result.AuthenticationResultMetadata.TokenSource);
-        }
-
-        /// <summary>
-        /// Creates a token cache (implementation of your choice)
-        /// </summary>
-        /// <param name="cacheImplementation">implementation for the token cache</param>
-        /// <returns>An MSAL Token cache provider</returns>
-        private static IMsalTokenCacheProvider CreateTokenCache(
-            CacheImplementationDemo cacheImplementation = CacheImplementationDemo.InMemory)
-        {
-            IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
-            .ConfigureLogging(l => { })
-            .ConfigureServices(services =>
-            {
-                ConfigureCache(cacheImplementation, services);
-            });
-
-            IServiceProvider serviceProvider = hostBuilder.Build().Services;
-            IMsalTokenCacheProvider msalTokenCacheProvider = serviceProvider.GetRequiredService<IMsalTokenCacheProvider>();
-            return msalTokenCacheProvider;
-        }
-
-        /// <summary>
-        /// Creates a token cache (implementation of your choice)
-        /// </summary>
-        /// <param name="cacheImplementation">implementation for the token cache</param>
-        /// <returns>An MSAL Token cache provider</returns>
-        private static void ConfigureCache(
-            CacheImplementationDemo cacheImplementation,
-            IServiceCollection services)
-        {
-            // (Simulates the configuration, could be a IConfiguration or anything)
-            Dictionary<string, string> Configuration = new Dictionary<string, string>();
-
-            switch (cacheImplementation)
-            {
-                case CacheImplementationDemo.InMemory:
-                    // In memory token cache
-                    // In net472, requires to reference Microsoft.Extensions.Caching.Memory
-                    services.AddInMemoryTokenCaches();
-                    break;
-
-                case CacheImplementationDemo.DistributedMemory:
-                    // In memory distributed token cache
-                    // In net472, requires to reference Microsoft.Extensions.Caching.Memory
-                    services.AddDistributedTokenCaches();
-                    services.AddDistributedMemoryCache();
-                    break;
-
-                case CacheImplementationDemo.DistributedSqlServer:
-                    // SQL Server token cache
-                    // Requires to reference Microsoft.Extensions.Caching.SqlServer
-                    services.AddDistributedTokenCaches();
-                    services.AddDistributedSqlServerCache(options =>
-                    {
-                        options.ConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TestCache;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-                        options.SchemaName = "dbo";
-                        options.TableName = "TestCache";
-
-                        // You don't want the SQL token cache to be purged before the access token has expired. Usually
-                        // access tokens expire after 1 hour (but this can be changed by token lifetime policies), whereas
-                        // the default sliding expiration for the distributed SQL database is 20 mins. 
-                        // Use a value which is above 60 mins (or the lifetime of a token in case of longer lived tokens)
-                        options.DefaultSlidingExpiration = TimeSpan.FromMinutes(90);
-                    });
-                    break;
-
-                case CacheImplementationDemo.StackExchangeRedis:
-                    // Redis token cache
-                    // Requires to reference Microsoft.Extensions.Caching.StackExchangeRedis
-                    services.AddDistributedTokenCaches();
-                    services.AddStackExchangeRedisCache(options =>
-                    {
-                        options.Configuration = "localhost";
-                        options.InstanceName = "Redis";
-                    });
-                    break;
-
-                case CacheImplementationDemo.CosmosDb:
-                    // Redis token cache
-                    // Requires to reference Microsoft.Extensions.Caching.Cosmos (preview)
-                    services.AddDistributedTokenCaches();
-                    services.AddCosmosCache((CosmosCacheOptions cacheOptions) =>
-                    {
-                        cacheOptions.ContainerName = Configuration["CosmosCacheContainer"];
-                        cacheOptions.DatabaseName = Configuration["CosmosCacheDatabase"];
-                        cacheOptions.ClientBuilder = new CosmosClientBuilder(Configuration["CosmosConnectionString"]);
-                        cacheOptions.CreateIfNotExists = true;
-                    });
-                    break;
-
-                default:
-                    break;
-            }
         }
     }
 }
