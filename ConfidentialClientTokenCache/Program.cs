@@ -49,8 +49,8 @@ namespace ConfidentialClientTokenCache
                 .WithTenantId(tenant)
                 .Build();
 
-            // Distributed in memory token caches (App and User caches)
-            app.AddInMemoryTokenCache();
+            //  In memory token caches (App and User caches)
+            // app.AddInMemoryTokenCache();
 
             // Or
 
