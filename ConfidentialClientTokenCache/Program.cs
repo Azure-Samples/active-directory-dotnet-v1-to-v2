@@ -59,6 +59,8 @@ namespace ConfidentialClientTokenCache
             app.AddDistributedTokenCache(services =>
             {
                 services.AddDistributedMemoryCache();
+                services.AddLogging(configure => configure.AddConsole())
+                .Configure<LoggerFilterOptions>(options => options.MinLevel = Microsoft.Extensions.Logging.LogLevel.Debug);
 
                 /* Remove comments to use SQL cache implementation
                 services.AddDistributedSqlServerCache(options =>
