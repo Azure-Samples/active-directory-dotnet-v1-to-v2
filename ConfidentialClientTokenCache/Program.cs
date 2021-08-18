@@ -1,16 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Azure.Cosmos.Fluent;
-using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.TokenCacheProviders;
-using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
-using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,21 +19,11 @@ namespace ConfidentialClientTokenCache
     /// </summary>
     static class Program
     {
-        static async Task Main(string[] args)
+        static async Task<AuthenticationResult> CreateAppAndGetToken(CertificateDescription certDescription, int cacheType)
         {
             string clientId = "6af093f3-b445-4b7a-beae-046864468ad6";
             string tenant = "msidentitysamplestesting.onmicrosoft.com";
             string[] scopes = new[] { "api://8206b76f-586e-4098-b1e5-598c1aa3e2a1/.default" };
-
-            // Simulates the configuration, could be a IConfiguration or anything
-            Dictionary<string, string> Configuration = new Dictionary<string, string>();
-
-            // Certificate Loading
-            string keyVaultContainer = "https://WebAppsApisTests.vault.azure.net";
-            string keyVaultReference = "Self-Signed-5-5-22";
-            CertificateDescription certDescription = CertificateDescription.FromKeyVault(keyVaultContainer, keyVaultReference);
-            ICertificateLoader certificateLoader = new DefaultCertificateLoader();
-            certificateLoader.LoadIfNeeded(certDescription);
 
             // Create the confidential client application
             IConfidentialClientApplication app;
@@ -49,18 +33,23 @@ namespace ConfidentialClientTokenCache
                 .WithTenantId(tenant)
                 .Build();
 
-            //  In memory token caches (App and User caches)
-            // app.AddInMemoryTokenCache();
+            if (cacheType == 0)
+            {
+                // In memory token caches (App and User caches)
+                app.AddInMemoryTokenCache();
+            }
 
             // Or
 
             // Distributed token caches (App and User caches)
             // Add one of the below: SQL, Redis, CosmosDb
-            app.AddDistributedTokenCache(services =>
+            else
             {
-                services.AddDistributedMemoryCache();
-                services.AddLogging(configure => configure.AddConsole())
-                .Configure<LoggerFilterOptions>(options => options.MinLevel = Microsoft.Extensions.Logging.LogLevel.Debug);
+                app.AddDistributedTokenCache(services =>
+                {
+                    services.AddDistributedMemoryCache();
+                    services.AddLogging(configure => configure.AddConsole())
+                    .Configure<LoggerFilterOptions>(options => options.MinLevel = Microsoft.Extensions.Logging.LogLevel.Warning);
 
                 /* Remove comments to use SQL cache implementation
                 services.AddDistributedSqlServerCache(options =>
@@ -98,15 +87,36 @@ namespace ConfidentialClientTokenCache
                     cacheOptions.CreateIfNotExists = true;
                 });
                 */
-            });
+                });
+            }
 
             // Acquire a token (twice)
             var result = await app.AcquireTokenForClient(scopes)
                 .ExecuteAsync();
-            Console.WriteLine(result.AuthenticationResultMetadata.TokenSource);
+            return result;
+        }
 
-            result = await app.AcquireTokenForClient(scopes)
-                .ExecuteAsync();
+
+        static async Task Main(string[] args)
+        {
+
+            // Simulates the configuration, could be a IConfiguration or anything
+            Dictionary<string, string> Configuration = new Dictionary<string, string>();
+
+            // Certificate Loading
+            string keyVaultContainer = "https://WebAppsApisTests.vault.azure.net";
+            string keyVaultReference = "Self-Signed-5-5-22";
+            CertificateDescription certDescription = CertificateDescription.FromKeyVault(keyVaultContainer, keyVaultReference);
+            ICertificateLoader certificateLoader = new DefaultCertificateLoader();
+            certificateLoader.LoadIfNeeded(certDescription);
+
+            var result = await CreateAppAndGetToken(certDescription, 0);
+            Console.WriteLine(result.AuthenticationResultMetadata.TokenSource);
+            result = await CreateAppAndGetToken(certDescription, 0);
+            Console.WriteLine(result.AuthenticationResultMetadata.TokenSource);
+            result = await CreateAppAndGetToken(certDescription, 1);
+            Console.WriteLine(result.AuthenticationResultMetadata.TokenSource);
+            result = await CreateAppAndGetToken(certDescription, 1);
             Console.WriteLine(result.AuthenticationResultMetadata.TokenSource);
         }
     }
