@@ -24,7 +24,7 @@ namespace ADAL2MSAL
 
         // Initializes the cache against a local file.
         // If the file is already present, it loads its content in the ADAL cache
-        public AdalFileCache(string adalV3FilePath, string msalCacheFilePath)
+        public AdalFileCache(string adalV3FilePath)
         {
             AdalV3CacheFilePath = adalV3FilePath;
             AfterAccess = AfterAccessNotification;
