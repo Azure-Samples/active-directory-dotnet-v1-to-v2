@@ -1,8 +1,5 @@
 # Token cache migration between ADAL.NET 3.x, ADAL.NET 4.x, and MSAL.NET 2.x
 
-> This sample is for ADAL.NET 5 and above and MSAL.NET 3.x
->
-
 This solution shows how to migrate the token cache from ADAL to MSAL, so that users do not have to be prompted. ADAL v3 code is very similar.
 
 For a more complex sample see [this branch](https://github.com/Azure-Samples/active-directory-dotnet-v1-to-v2/tree/side_by_side_adal_msal/TokenCacheMigration). This shows:
