@@ -146,7 +146,7 @@ namespace ADAL2MSAL
                             Console.ResetColor();
 
                             break;
-                        case '9': // [MSAL] Advanced scenario - if you have the refresh token already
+                        case '8': // [MSAL] Advanced scenario - if you have the refresh token already
 
 
                             if (string.IsNullOrEmpty(Settings.RefreshToken))
@@ -160,7 +160,8 @@ namespace ADAL2MSAL
                             Console.WriteLine("The account id is: " + msalResult.Account.HomeAccountId);
                             Console.ResetColor();
                             break;
-                        case '8': // [MSAL] Clear Cache
+                            
+                        case '9': // [MSAL] Clear Cache
                             pca = CreateMsalApp();
                             accounts = await pca.GetAccountsAsync();
                             foreach (var account in accounts)
