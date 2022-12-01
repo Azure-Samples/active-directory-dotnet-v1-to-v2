@@ -16,6 +16,11 @@ namespace ADAL2MSAL
 
         public static readonly string[] MsalScope = new[] { "User.Read" };
         public const string AdalResource = "https://graph.microsoft.com/";
+
+
+        // Advanced scenario - if you have a refresh token (e.g. from ADAL v2), paste it here.
+        // Important - do not publish or log the refresh token, it's highly confidential!!
+        public const string RefreshToken = ""; 
     }
 
     class Program
@@ -39,7 +44,8 @@ namespace ADAL2MSAL
                         5. [MSAL] Get Accounts 
                         6. [MSAL] Acquire Token Silent with first account
                         7. [MSAL] Acquire Token Interactive
-                        8. [MSAL] Clear Cache
+                        8. [MSAL] Acquire Token By Refresh Token (advanced)
+                        9. [MSAL] Clear Cache
                         -------------------------------------------------
                         x. Exit app
                         
@@ -51,6 +57,9 @@ namespace ADAL2MSAL
                 {
                     switch (selection)
                     {
+                            
+
+
                         case '1':  // [ADAL] Get Users
                             var authContext = CreateAdalContext();
 
@@ -137,6 +146,20 @@ namespace ADAL2MSAL
                             Console.ResetColor();
 
                             break;
+                        case '9': // [MSAL] Advanced scenario - if you have the refresh token already
+
+
+                            if (string.IsNullOrEmpty(Settings.RefreshToken))
+                                throw new ArgumentException("Update the class Settings with an actual RefrehsToken");
+
+                            var pcaRT = CreateMsalApp() as IByRefreshToken;
+                            msalResult = await pcaRT.AcquireTokenByRefreshToken(Settings.MsalScope, Settings.RefreshToken).ExecuteAsync();
+
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("Got a token for: " + msalResult.Account.Username);
+                            Console.WriteLine("The account id is: " + msalResult.Account.HomeAccountId);
+                            Console.ResetColor();
+                            break;
                         case '8': // [MSAL] Clear Cache
                             pca = CreateMsalApp();
                             accounts = await pca.GetAccountsAsync();
@@ -145,7 +168,9 @@ namespace ADAL2MSAL
                                 await pca.RemoveAsync(account);
                             }
                             break;
-                    }       
+
+                        
+                    }
                 }           
                 catch (Exception e)
                 {

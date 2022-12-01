@@ -6,6 +6,7 @@ For a more complex sample see [this branch](https://github.com/Azure-Samples/act
 
 - ADAL + MSAL side by side (e.g. a web service where one machine uses ADAL and one machine uses MSAL). 
 - ADAL v3 to MSAL migration
+- Acquiring a token by refresh token (ADAL v2 to MSAL migration)
 
 ## Features
 

@@ -1,18 +1,15 @@
 ﻿using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADAL2MSAL
 {
     /// <summary>
-    ///  IMPORTANT: only suitable for desktop apps (public client apps), not for web sites, web services etc.
+    ///  IMPORTANT: encrypted files are suitable for desktop apps (public client apps), not for web sites, web services etc.
+    ///  For web sites, we recommend you rely on SSO from the browser, and not rely on token cache migration.
+    ///  Fop web API (AcquireTokenOnBehalfOf) and app 2 app (AcquireTokenForClient), refresh token migration is not supported.
     ///  
-    /// Assumes that both ADAL and MSAL token caches are stored on disk and encrypted with Data Protection API.
+    ///  Assumes that both ADAL and MSAL token caches are stored on disk and encrypted with Data Protection API.
     /// 
     ///  For cross platform desktop apps (Windows, Mac, Linux), see https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet
     ///  For web sites and web services, see https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization
